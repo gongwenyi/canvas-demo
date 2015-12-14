@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>径向渐变</title>
+  <style>
+    *{
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" style="display: block; margin: 0 auto;"></canvas>
+
+  <script>
+    window.onload = function(){
+      var canvas = document.getElementById('canvas'),
+          ctx = canvas.getContext('2d');
+      canvas.width = document.documentElement.clientWidth;
+      canvas.height = document.documentElement.clientHeight;
+      var bgColor = ctx.createRadialGradient(canvas.width/2, canvas.height, 0, canvas.width/2, canvas.height, canvas.height);
+      bgColor.addColorStop(0, '#046');
+      bgColor.addColorStop(1, '#000');
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      function starPath(ctx){
+        ctx.beginPath();
+        for(var i=0; i<5; i++){
+          ctx.lineTo(Math.cos((18+i*72)/180*Math.PI), -Math.sin((18+i*72)/180*Math.PI));
+          ctx.lineTo(Math.cos((54+i*72)/180*Math.PI)*0.5, -Math.sin((54+i*72)/180*Math.PI)*0.5);
+        }
+        ctx.closePath();
+      };
+      function drawStar(ctx, x, y, r, rotate){
+        ctx.save();
+        ctx.fillStyle = '#abcdef';
+        ctx.translate(x, y);
+        ctx.scale(r, r);
+        ctx.rotate(rotate);
+        starPath(ctx);
+        ctx.fill();
+        ctx.restore();
+      };
+      for(var i=0; i<500; i++){
+        var x = Math.random()*canvas.width,
+            y = Math.random()*canvas.height*0.5,
+            r = Math.random()*3+3,
+            rotate = Math.random()*360;
+        drawStar(ctx, x, y, r, rotate);
+      }
+
+      //弯月
+      ctx.save();
+      ctx.translate(canvas.width-400, 200);
+      ctx.rotate(-50);
+      ctx.beginPath();
+      ctx.arc(0, 0, 50, 0.5*Math.PI, 1.5*Math.PI, true);
+      ctx.moveTo(0, -50);
+      ctx.arcTo(100, 0, 0, 50, 50*Math.sqrt(50*50+100*100)/100);
+      ctx.closePath();
+      //context.stroke();
+      ctx.fillStyle = '#55f';
+      ctx.fill();
+      ctx.restore();
+
+      //草地
+      // ctx.save();
+      // ctx.beginPath();
+      // ctx.moveTo(0, canvas.height*0.7);
+      // ctx.bezierCurveTo(canvas.width*0.3, canvas.height*0.5, canvas.width*0.7, canvas.height*0.8, canvas.width, canvas.height*0.7);
+      // ctx.lineTo(canvas.width, canvas.height);
+      // ctx.lineTo(0, canvas.height);
+      // ctx.closePath();
+      // var color = ctx.createLinearGradient(0, canvas.height, 0, canvas.height*0.5);
+      // color.addColorStop(0.0, '#000');
+      // color.addColorStop(1.0, '#0f0');
+      // ctx.fillStyle = color;
+      // ctx.fill();
+      // ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height*0.9);
+      ctx.bezierCurveTo(canvas.width*0.2, canvas.height*0.8,canvas.width*0.7, canvas.height*0.5,  canvas.width, canvas.height*0.7);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.lineTo(0, canvas.height);
+      ctx.closePath();
+      var color = ctx.createLinearGradient(0, canvas.height, 0, canvas.height*0.5);
+      color.addColorStop(0.0, '#000');
+      color.addColorStop(1.0, '#5fa');
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.restore();
+    };
+  </script>
+</body>
+</html>

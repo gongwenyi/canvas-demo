@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>红包雨效果</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body{
+          cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="mycanvas" style="display:block; margin: 0 auto;">
+        您的浏览器版本太旧了，不支持canvas，请升级到高版本！
+    </canvas>
+    <script>
+    window.onload = function() {
+        var canvas = document.getElementById('mycanvas'),
+            ctx = canvas.getContext('2d');
+        canvas.width = document.documentElement.clientWidth;
+        canvas.height = document.documentElement.clientHeight;
+
+        window.requestAnimFrame = (function() {
+            return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+                function(callback, element) {
+                    return window.setTimeout(callback, 1000 / 60);
+                };
+        })();
+
+        var startTime = 0,
+              endTime = 0;
+        canvas.addEventListener('mousedown', function() {
+            startTime = (new Date()).getTime();
+        });
+
+        var point = {};
+        point.isClick = false;
+        canvas.addEventListener('click', function(e) {
+            endTime = (new Date()).getTime();
+            if(endTime - startTime > 300)   //防止长按后松开触发点中红包
+                return false;
+
+            point.x = e.clientX;
+            point.y = e.clientY;
+            point.isClick = true;
+        }, false);
+
+        function main() {
+            drawBg();
+
+            //添加红包
+            var img = new Image();
+            img.src = 'hb2.png';
+            img.onload = function() {
+                drawHongBao(img);
+                loop();
+            }
+        }
+
+        //背景
+        function drawBg() {
+            var bgColor = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bgColor.addColorStop(0, '#000');
+            bgColor.addColorStop(1, '#046');
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function getRandom(min, max) {
+            return (min + 　Math.random() * (max - min)) | 0;
+        }
+
+        var Hongbaos = [];
+        function drawHongBao(img) {
+            for (var i = 0; i < 10; i++) {
+                var x = Math.random() * canvas.width + 400, //x坐标
+                    y = -Math.random() * canvas.height, //y坐标
+
+                    rotate = getRandom(0, 45), //旋转角度
+                    speedX = getRandom(2, 4) * Math.sin(rotate * Math.PI / 180),
+                    speedY = getRandom(4, 6); //y轴移动速度
+                    console.log(x+"  "+y);
+                Hongbaos.push(new Hongbao(img, x, y, speedX, speedY, rotate));
+            }
+        }
+
+        //红包类
+        function Hongbao(img, x, y, speedX, speedY, rotate) {
+            this.img = img;
+            this.x = x;
+            this.y = y;
+            this.speedX = speedX;
+            this.speedY = speedY;
+            this.rotate = rotate;
+        }
+        //画红包
+        Hongbao.prototype.draw = function() {
+            ctx.save();
+            ctx.beginPath();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotate * Math.PI / 180);
+
+            //判断是否点中
+            ctx.rect(0, 0, 60, 90);
+            if(point.isClick) {
+              if (ctx.isPointInPath(point.x, point.y)) {
+                point.isClick = false;
+                this.x = Math.random() * canvas.width + 400;
+                this.y = -(Math.random() * canvas.height);
+              }
+            }
+
+            ctx.drawImage(this.img, 0, 0);
+            ctx.closePath();
+            ctx.restore();
+        }
+        //红包移动
+        Hongbao.prototype.move = function() {
+            this.x -= this.speedX;
+            this.y += this.speedY;
+            if (this.y > canvas.height || this.x < 0) {
+                this.x = Math.random() * canvas.width;
+                this.y = -(Math.random() * canvas.height);
+            }
+            this.draw();
+        }
+
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBg();
+            Hongbaos.forEach(function(item) {
+                item.move();
+            });
+
+            window.requestAnimFrame(loop);
+        }
+
+        main();
+
+
+    }
+    </script>
+</body>
+
+</html>
